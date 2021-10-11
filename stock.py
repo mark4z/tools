@@ -1,23 +1,55 @@
-import json
-from decimal import Decimal
+import time
 
-import requests
+from selenium import webdriver
 
-url = "http://fundgz.1234567.com.cn/js/#{code}.js"
 
-all = "31544.28"
-codes = "519755,519718,519723,164902,519752,519782,519738,006793,008204,519772,519704,005001".split(",")
-scale = "12.87, 12.81, 11.79, 11.79, 10.52, 9.80, 9.79, 5.92, 5.35, 4.11, 3.33, 1.29, 0.63".split(",")
+def process(url_str, options):
+    with webdriver.Remote(
+            options=options,
+            command_executor='http://127.0.0.1:4444/wd/hub'
+    ) as driver:
+        # with webdriver.Chrome(
+        #         options=options,
+        # ) as driver:
+        driver.get(url_str)
 
-ans = Decimal()
-for i in range(len(codes)):
-    c = codes[i]
-    res = json.loads(requests.get(url.replace("#{code}", c)).text.replace("jsonpgz(", "").replace(");", ""))
+        cookies = driver.get_cookies()
+        print(cookies)
 
-    gszzl = Decimal(res['gszzl'])
-    hold = Decimal(scale[i])
-    q = (gszzl / 100) * (hold / 100)
+        driver.get('http://cnzz.mmstat.com')
+        cookies = driver.get_cookies()
+        print(cookies)
 
-    print(f'{gszzl:+}', hold, f'{q:+}', res['name'], res['gztime'])
-    ans += q
-print(ans, Decimal(all) * ans)
+
+if __name__ == '__main__':
+    url = "http://47.100.220.7/index2.html"
+    # url = "http://www.baidu.com"
+
+    option = webdriver.ChromeOptions()
+    option.add_argument('--disable-gpu')
+    option.add_argument('--no-sandbox')
+
+    experimentalFlags = [
+        "same-site-by-default-cookies@2",
+        "cookies-without-same-site-must-be-secure@2", ]
+    chromeLocalStatePrefs = {"browser.enabled_labs_experiments": experimentalFlags}
+    option.add_experimental_option("localState", chromeLocalStatePrefs)
+
+    UA = 'Mozilla/5.0 (Linux; Android 4.1.1; GT-N7100 Build/JRO03C) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/35.0.1916.138 Mobile Safari/537.36 T7/6.3'
+
+    mobileEmulation = {"deviceMetrics": {"width": 375, "height": 812, "pixelRatio": 2.0}, "userAgent": UA}
+    option.add_experimental_option('mobileEmulation', mobileEmulation)
+
+    # PROXY = "175.146.212.92:4256"
+    # option.set_capability("proxy", {
+    #     "httpProxy": PROXY,
+    #     "ftpProxy": PROXY,
+    #     "sslProxy": PROXY,
+    #     "proxyType": "MANUAL",
+    # })
+
+    now = (int(round(time.time() * 1000)))
+    for i in range(0, 1):
+        process(url, option)
+    now2 = (int(round(time.time() * 1000)))
+    print(now2 - now)
