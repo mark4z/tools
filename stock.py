@@ -27,9 +27,9 @@ def process(url_str, options):
             options=options,
             command_executor='http://127.0.0.1:4444/wd/hub'
     ) as driver:
-        # with webdriver.Chrome(
-        #         options=options
-        # ) as driver:
+    # with webdriver.Chrome(
+    #         options=options
+    # ) as driver:
         print(send(driver, 'Emulation.setNavigatorOverrides', {"platform": "iPhone"}))
         # driver.execute_cdp_cmd('Emulation.setNavigatorOverrides', {"platform": "iPhone"})
 
@@ -37,7 +37,7 @@ def process(url_str, options):
         driver.get(url_str)
 
         print('scroll')
-        for i in range(0, 3):
+        for i in range(0, (int(round(time.time() * 1000))) % 5):
             TouchActions(driver).scroll(150, 200).perform()
         print('scroll end')
 
@@ -52,7 +52,8 @@ def process(url_str, options):
             except AttributeError as err:
                 print(err)
                 pass
-        driver.save_screenshot("./10.png")
+        driver.save_screenshot("./" + str(int(round(time.time() * 1000))) + ".png")
+        time.sleep(10)
 
 
 if __name__ == '__main__':
@@ -75,19 +76,22 @@ if __name__ == '__main__':
 
     UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) ' \
          'Mobile/15E148 MicroMessenger/8.0.15(0x18000f24) NetType/WIFI Language/zh_CN '
-    mobileEmulation = {"deviceMetrics": {"width": 376, "height": 812, "pixelRatio": 2.0}, "userAgent": UA}
+    mobileEmulation = {"deviceMetrics": {"width": 378, "height": 812, "pixelRatio": 2.0}, "userAgent": UA}
     option.add_experimental_option('mobileEmulation', mobileEmulation)
 
-    # PROXY = "175.146.212.92:4256"
-    # option.set_capability("proxy", {
-    #     "httpProxy": PROXY,
-    #     "ftpProxy": PROXY,
-    #     "sslProxy": PROXY,
-    #     "proxyType": "MANUAL",
-    # })
+    ips = []
+    with open("1.txt", "r") as f:
+        ips = f.readlines()
 
     now = (int(round(time.time() * 1000)))
-    for i in range(0, 100):
+    for i in range(0, len(ips)):
+        PROXY = ips[i]
+        option.set_capability("proxy", {
+            "httpProxy": PROXY,
+            "ftpProxy": PROXY,
+            "sslProxy": PROXY,
+            "proxyType": "MANUAL",
+        })
         process(url, option)
     now2 = (int(round(time.time() * 1000)))
     print(now2 - now)
