@@ -3,8 +3,10 @@ package main
 import (
 	"crypto/md5"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -13,13 +15,19 @@ import (
 )
 
 func main() {
-	total := 3000
+	args := flag.Int("t", 100, "t")
+	flag.Parse()
+
+	total := *args
+	log.Println(total)
 
 	cur := 0
 
-	for i := 0; i < 50; i++ {
+	for i := 0; i < 100; i++ {
 		id := "P003756"
-		point := 100 + rand.Intn(80)
+		rand.Seed(time.Now().UnixNano())
+
+		point := 50 + rand.Intn(100)
 
 		cur += point
 		if cur > total {
@@ -52,7 +60,7 @@ func main() {
 		defer do.Body.Close()
 
 		all, _ := ioutil.ReadAll(do.Body)
-		println(string(all))
+		log.Println(point, cur, string(all))
 
 		delay := 30 + int(point/5)
 		time.Sleep(time.Duration(delay) * time.Second)

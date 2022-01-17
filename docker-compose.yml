@@ -1,0 +1,6 @@
+version: "3"
+services:
+  lianwei:
+    image: lianwei
+    volumes:
+      - "/etc/localtime:/etc/localtime"
